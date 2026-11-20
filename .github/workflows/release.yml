@@ -1,0 +1,203 @@
+# Build php7.4 for Ubuntu 18.04 from the PPA source, test it in clean
+# ubuntu:18.04 containers, attest the build provenance and publish one GitHub
+# Release per revision.
+#
+# Run it from the Actions tab: "Build and release" -> "Run workflow".
+
+name: Build and release
+
+on:
+  workflow_dispatch:
+    inputs:
+      revisions:
+        description: 'PPA revisions of 1:7.4.33-NN to build, separated by spaces (e.g. "31 37"). Empty = latest.'
+        required: false
+        default: ''
+      release:
+        description: 'Publish a GitHub Release for each revision (existing releases are left alone)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-and-release
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      revisions: ${{ steps.plan.outputs.revisions }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+      count: ${{ steps.plan.outputs.count }}
+      latest: ${{ steps.plan.outputs.latest }}
+    steps:
+      - id: plan
+        env:
+          INPUT_REVISIONS: ${{ inputs.revisions }}
+        run: |
+          # Only decides what to build. build-php74-bionic.sh verifies the source itself.
+          current=$(curl -fsSL https://ppa.launchpadcontent.net/ondrej/php/ubuntu/dists/jammy/main/source/Sources.gz \
+            | gunzip | awk '/^Package: php7\.4$/{f=1} f && /^Version:/ && !v {v=$2} END{print v}')
+          echo "Current PPA version: $current"
+          latest=${current#*-}; latest=${latest%%+*}
+          [[ "$latest" =~ ^[0-9]+$ ]] || { echo "::error::Cannot read the revision from '$current'"; exit 1; }
+
+          revs=$(echo $INPUT_REVISIONS)
+          [ -n "$revs" ] || revs=$latest
+          for r in $revs; do
+            [[ "$r" =~ ^[0-9]+$ ]] || { echo "::error::Not a revision number: $r"; exit 1; }
+          done
+          revs=$(printf '%s\n' $revs | sort -nu | xargs)
+          echo "Building: $revs (latest on the PPA: $latest)"
+
+          {
+            echo "revisions=$revs"
+            echo "matrix=$(printf '%s\n' $revs | jq -R . | jq -cs .)"
+            echo "count=$(wc -w <<<"$revs" | tr -d ' ')"
+            echo "latest=$latest"
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    strategy:
+      fail-fast: false
+      matrix:
+        revision: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      REV: ${{ matrix.revision }}
+      NAME: php7.4-bionic-7.4.33-${{ matrix.revision }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          sudo env PHP74_REVISION="$REV" OUT_DIR="$PWD/dist/$NAME" WORK_DIR="$RUNNER_TEMP/work" \
+            ./build-php74-bionic.sh
+          sudo chown -R "$(id -u):$(id -g)" dist
+
+      - name: Test fresh install
+        run: |
+          docker run --rm --platform linux/amd64 -v "$PWD/dist/$NAME:/debs:ro" -v "$PWD/tests:/tests:ro" \
+            ubuntu:18.04 bash /tests/fresh-install.sh /debs | tee fresh.log
+          grep -qx 'RESULT=PASS' fresh.log
+
+      - name: Package
+        run: |
+          cd dist
+          ver=$(dpkg-deb -f "$NAME"/php7.4-common_*.deb Version)
+          {
+            echo "version: $ver"
+            echo "source: ${ver%%+*}+ubuntu22.04.1+deb.sury.org+1 (ppa:ondrej/php, jammy)"
+            echo "php -v: $(sed -n 's/^PHP_V=//p' ../fresh.log)"
+            echo "commit: $GITHUB_SHA"
+            echo "workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } > "$NAME/BUILD-INFO.txt"
+          cat "$NAME/BUILD-INFO.txt"
+          (cd "$NAME" && sha256sum -c SHA256SUMS)
+          tar -cf "$NAME-amd64.tar" "$NAME"
+
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/${{ env.NAME }}-amd64.tar
+            dist/${{ env.NAME }}/*.deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NAME }}
+          path: dist/
+          if-no-files-found: error
+
+  upgrade-test:
+    needs: [plan, build]
+    if: fromJSON(needs.plan.outputs.count) >= 2
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: php7.4-bionic-7.4.33-*
+          merge-multiple: true
+          path: dist
+
+      - name: Upgrade oldest -> newest, then roll back
+        env:
+          REVS: ${{ needs.plan.outputs.revisions }}
+        run: |
+          old=$(printf '%s\n' $REVS | head -1)
+          new=$(printf '%s\n' $REVS | tail -1)
+          docker run --rm --platform linux/amd64 -v "$PWD/dist:/dist:ro" -v "$PWD/tests:/tests:ro" \
+            ubuntu:18.04 bash /tests/upgrade-rollback.sh \
+            "/dist/php7.4-bionic-7.4.33-$old" "/dist/php7.4-bionic-7.4.33-$new" | tee upgrade.log
+          grep -qx 'RESULT=PASS' upgrade.log
+
+  release:
+    needs: [plan, build, upgrade-test]
+    if: >-
+      always() && inputs.release &&
+      needs.build.result == 'success' &&
+      (needs.upgrade-test.result == 'success' || needs.upgrade-test.result == 'skipped')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: php7.4-bionic-7.4.33-*
+          merge-multiple: true
+          path: dist
+
+      - name: Publish releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVS: ${{ needs.plan.outputs.revisions }}
+          LATEST: ${{ needs.plan.outputs.latest }}
+        run: |
+          cd dist
+          for rev in $REVS; do
+            tag="7.4.33-$rev"
+            name="php7.4-bionic-$tag"
+            if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "::notice::Release $tag already exists, left unchanged"
+              continue
+            fi
+            ver=$(dpkg-deb -f "$name"/php7.4-common_*.deb Version)
+            phpv=$(sed -n 's/^php -v: //p' "$name/BUILD-INFO.txt")
+            latest_flag=--latest=false
+            [ "$rev" = "$LATEST" ] && latest_flag=--latest
+
+            cat > notes.md <<EOF
+          php7.4 \`$ver\` for Ubuntu 18.04 (bionic), amd64.
+
+          Rebuilt without source changes from \`${ver%%+*}+ubuntu22.04.1+deb.sury.org+1\` in [ppa:ondrej/php](https://launchpad.net/~ondrej/+archive/ubuntu/php).
+
+          - \`php -v\` shows: \`$phpv\`
+          - Install, upgrade and rollback steps: [README](https://github.com/$GITHUB_REPOSITORY#readme) · [繁體中文](https://github.com/$GITHUB_REPOSITORY/blob/main/README.zh-TW.md)
+          - Built and tested by [this workflow run]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)
+
+          Verify where the files came from:
+
+          \`\`\`bash
+          gh attestation verify $name-amd64.tar --repo $GITHUB_REPOSITORY
+          \`\`\`
+          EOF
+
+            gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+              --title "php7.4 $tag for Ubuntu 18.04" --notes-file notes.md $latest_flag \
+              "$name-amd64.tar" "$name"/*.deb "$name"/SHA256SUMS "$name"/BUILD-INFO.txt \
+              "$name"/*.buildinfo "$name"/*.changes
+          done

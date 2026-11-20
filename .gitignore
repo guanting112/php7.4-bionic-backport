@@ -1,0 +1,10 @@
+.DS_Store
+
+# Packages are published as GitHub Release assets, never committed
+*.deb
+*.ddeb
+*.tar
+dist/
+
+# Build logs (~8 MB per version)
+*.log

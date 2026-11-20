@@ -130,6 +130,8 @@ sudo php-fpm7.4 -t && sudo systemctl status php7.4-fpm --no-pager
 | `BUILD-INFO.txt` | 套件版號、來源版號、`php -v` 的輸出、git commit、workflow 執行紀錄 |
 | `*.buildinfo`、`*.changes` | Debian 的編譯資訊 |
 
+`.deb` 也有一個一個附在 Release 上，但 GitHub 會把檔名裡的 `~` 改成 `.`：`php-common_101~+…` 會變成 `php-common_101.+…`，跟 `SHA256SUMS` 對不起來。tarball 裡的檔名是原本的，所以請下載 tarball。
+
 ### -31 到 -37 改了什麼
 
 整理自 Debian changelog（`zcat /usr/share/doc/php7.4-common/changelog.Debian.gz`）：
@@ -262,7 +264,7 @@ changelog 的簽名固定是 `Local backport build <root@localhost>`，套件裡
 
 2. 打開 **Actions → Build and release → Run workflow**。
 3. 填入要編的版本，用空白分隔，例如 `31 37`。留空就是編最新版。同時編兩個以上的版本時，會順便跑一次「最舊升到最新再退回」的測試。
-4. 等它跑完，約 30 分鐘。多個版本會同時編。
+4. 等它跑完，約 15 分鐘。多個版本會同時編，每個約 11 分鐘。
 
 注意：
 

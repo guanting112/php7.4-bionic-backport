@@ -126,6 +126,8 @@ Each release contains:
 | `BUILD-INFO.txt` | Package version, source version, `php -v` output, git commit and workflow run |
 | `*.buildinfo`, `*.changes` | Debian build metadata |
 
+The `.deb` files are also attached one by one, but GitHub renames assets that contain `~`: `php-common_101~+…` becomes `php-common_101.+…`, which no longer matches `SHA256SUMS`. The tarball keeps the original names, so use it.
+
 ### What changed from -31 to -37
 
 From the Debian changelog (`zcat /usr/share/doc/php7.4-common/changelog.Debian.gz`):
@@ -258,7 +260,7 @@ The changelog entry is signed `Local backport build <root@localhost>` so that no
 
 2. Open **Actions → Build and release → Run workflow**.
 3. Fill in the revisions, separated by spaces, for example `31 37`. Leave the field empty to build the latest. Building two or more also runs the upgrade and rollback test between the oldest and the newest.
-4. Wait for the run to finish, about 30 minutes. The revisions build in parallel.
+4. Wait for the run to finish, about 15 minutes. The revisions build in parallel, and each build takes about 11 minutes.
 
 Notes:
 

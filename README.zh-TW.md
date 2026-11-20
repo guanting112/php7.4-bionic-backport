@@ -15,9 +15,18 @@
 
 每個版本都由 [GitHub Actions](.github/workflows/release.yml) 公開編譯和測試，並附上可以自行驗證的 build provenance attestation（建置來源證明）。
 
+> [!IMPORTANT]
+> **請使用 `7.4.33-37`，它已經包含 PHP 7.4 最新的安全修補。**
+> 到 `-37` 為止，ppa:ondrej/php 移植到 PHP 7.4.33 的所有修補都在裡面，其中包括：
+>
+> - **`-36` 修補的 12 個 CVE**（來自 PHP 8.2.36）：包含 session 和時區快取可能造成的遠端執行程式碼、PHP-FPM 的 request smuggling 和權限提升、PHP-CGI 越界讀寫、PHAR 簽章繞過，以及 SOAP 的漏洞。
+> - **`-32` 修補的 CVE-2024-11235**：`php_request_shutdown` 的 use-after-free。
+>
+> 完整清單見 [-31 到 -37 改了什麼](#-31-到--37-改了什麼)。
+
 ## 下載和驗證
 
-沒有特別原因的話，請用 `7.4.33-37`。`7.4.33-31` 留著給退版用，兩版的差異見 [提供的版本](#提供的版本)。
+請使用 **`7.4.33-37`**。`7.4.33-31` 只留給退版用，**沒有**上面這些安全修補。
 
 在 18.04 主機上：
 
@@ -113,12 +122,14 @@ sudo php-fpm7.4 -t && sudo systemctl status php7.4-fpm --no-pager
 - `dpkg-query -W php7.4-cli php7.4-fpm`
 - 看 `php -v` 的 `built:` 時間。每個 Release 的說明和 `BUILD-INFO.txt` 都有列出。
 
+因為 `php -v` 的版號一直是 `7.4.33`，只比對版號的弱點掃描工具，可能還是會回報 `-37` 已經修好的 CVE。要確認裝了哪些修補，請看 changelog：`zcat /usr/share/doc/php7.4-common/changelog.Debian.gz | less`。
+
 ## 提供的版本
 
 | Release | 套件版號 | 來源 | 用途 |
 |---|---|---|---|
 | [`7.4.33-37`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-37) | `1:7.4.33-37+ubuntu18.04.1+local1` | `1:7.4.33-37+ubuntu22.04.1+deb.sury.org+1` | **建議使用**，全新安裝和升級 |
-| [`7.4.33-31`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-31) | `1:7.4.33-31+ubuntu18.04.1+local1` | `1:7.4.33-31+ubuntu22.04.1+deb.sury.org+1` | 退版用 |
+| [`7.4.33-31`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-31) | `1:7.4.33-31+ubuntu18.04.1+local1` | `1:7.4.33-31+ubuntu22.04.1+deb.sury.org+1` | 只給退版用，沒有 `-32` 到 `-37` 的修補 |
 
 每個 Release 裡有：
 

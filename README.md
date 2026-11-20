@@ -15,9 +15,18 @@ Unofficial rebuilds of the `php7.4` packages from [Ondřej Surý's PPA](https://
 
 Every release is built and tested in public by [GitHub Actions](.github/workflows/release.yml), and comes with a signed build provenance attestation that you can verify.
 
+> [!IMPORTANT]
+> **Use `7.4.33-37`. It already includes the latest PHP 7.4 security fixes.**
+> It contains every fix that ppa:ondrej/php had backported to PHP 7.4.33 as of `-37`. Among them:
+>
+> - **12 CVEs fixed in `-36`** (from PHP 8.2.36). They include remote code execution through sessions and the timezone cache, PHP-FPM request smuggling and privilege escalation, PHP-CGI out-of-bounds access, a PHAR signature bypass and SOAP flaws.
+> - **CVE-2024-11235**, fixed in `-32`: a use-after-free in `php_request_shutdown`.
+>
+> For the full list, see [What changed from -31 to -37](#what-changed-from--31-to--37).
+
 ## Download and verify
 
-Use `7.4.33-37` unless you have a reason not to. `7.4.33-31` is kept as a rollback target. See [Versions](#versions) for what changed between them.
+Use **`7.4.33-37`**. `7.4.33-31` is kept only as a rollback target and does not have the security fixes above.
 
 On the 18.04 server:
 
@@ -109,12 +118,14 @@ Use either of these instead:
 - `dpkg-query -W php7.4-cli php7.4-fpm`
 - The `built:` time in `php -v`. Each release lists it in its notes and in `BUILD-INFO.txt`.
 
+Because the version in `php -v` never changes, vulnerability scanners that only compare version numbers may keep reporting CVEs that `-37` has already fixed. To see which fixes are installed, read the changelog: `zcat /usr/share/doc/php7.4-common/changelog.Debian.gz | less`.
+
 ## Versions
 
 | Release | Package version | Rebuilt from | Use it for |
 |---|---|---|---|
 | [`7.4.33-37`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-37) | `1:7.4.33-37+ubuntu18.04.1+local1` | `1:7.4.33-37+ubuntu22.04.1+deb.sury.org+1` | **Recommended.** New installs and upgrades |
-| [`7.4.33-31`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-31) | `1:7.4.33-31+ubuntu18.04.1+local1` | `1:7.4.33-31+ubuntu22.04.1+deb.sury.org+1` | Rollback target |
+| [`7.4.33-31`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-31) | `1:7.4.33-31+ubuntu18.04.1+local1` | `1:7.4.33-31+ubuntu22.04.1+deb.sury.org+1` | Rollback target only. Doesn't have the fixes from `-32` to `-37` |
 
 Each release contains:
 

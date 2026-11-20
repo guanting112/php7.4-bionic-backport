@@ -2,7 +2,6 @@
 
 [![Build and release](https://github.com/guanting112/php7.4-bionic-backport/actions/workflows/release.yml/badge.svg)](https://github.com/guanting112/php7.4-bionic-backport/actions/workflows/release.yml)
 [![Latest release](https://img.shields.io/github/v/release/guanting112/php7.4-bionic-backport?label=release)](https://github.com/guanting112/php7.4-bionic-backport/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/guanting112/php7.4-bionic-backport/total)](https://github.com/guanting112/php7.4-bionic-backport/releases)
 [![Build provenance](https://img.shields.io/badge/build%20provenance-attested-2ea44f?logo=githubactions&logoColor=white)](https://github.com/guanting112/php7.4-bionic-backport/attestations)
 ![PHP 7.4.33](https://img.shields.io/badge/PHP-7.4.33-777BB4?logo=php&logoColor=white)
 ![Ubuntu 18.04](https://img.shields.io/badge/Ubuntu-18.04%20bionic%2C%20amd64-E95420?logo=ubuntu&logoColor=white)

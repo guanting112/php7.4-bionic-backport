@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- Source of social-preview.png (GitHub social preview, 1280x640).
-     Render: "Google Chrome" --headless=new --hide-scrollbars --window-size=1280,640 \
-               --screenshot=social-preview.png file://$PWD/social-preview.html -->
+     Render: "Google Chrome" --headless=new --hide-scrollbars --force-device-scale-factor=1 \
+               --window-size=1280,640 --screenshot=social-preview.png file://$PWD/social-preview.html -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -44,10 +44,10 @@
   .wrap {
     position: relative;
     height: 100%;
-    padding: 64px 72px 56px;
+    padding: 52px 72px 64px;
     display: grid;
-    grid-template-columns: 1fr 470px;
-    column-gap: 56px;
+    grid-template-columns: 1fr 486px;
+    column-gap: 48px;
     align-items: center;
   }
   .eyebrow {
@@ -61,24 +61,41 @@
   }
   .eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--ubuntu); display: block; }
   h1 {
-    margin-top: 26px;
+    margin-top: 22px;
     font-weight: 800;
-    font-size: 132px; line-height: .92; letter-spacing: -.035em;
+    font-size: 124px; line-height: .92; letter-spacing: -.035em;
     background: linear-gradient(180deg, #ffffff 10%, #c9cbf0 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
   h2 {
-    margin-top: 10px;
-    font-weight: 700; font-size: 54px; line-height: 1.05; letter-spacing: -.02em;
+    margin-top: 8px;
+    font-weight: 700; font-size: 52px; line-height: 1.05; letter-spacing: -.02em;
     color: var(--ink);
   }
   h2 em { font-style: normal; color: var(--ubuntu); }
-  .lede {
-    margin-top: 22px; max-width: 600px;
-    font-size: 24px; line-height: 1.4; color: var(--muted);
+  .patch {
+    margin-top: 26px;
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 11px 22px 11px 12px;
+    border-radius: 14px;
+    background: rgba(95, 212, 154, .10);
+    border: 1.5px solid rgba(95, 212, 154, .55);
   }
-  .lede code { font: 500 21px ui-monospace, "SF Mono", Menlo, monospace; color: var(--php); }
-  .chips { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .patch .tick {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--ok); color: #0b2619;
+    display: grid; place-items: center;
+    font-size: 22px; font-weight: 900;
+  }
+  .patch b { font: 700 30px ui-monospace, "SF Mono", Menlo, monospace; color: #fff; letter-spacing: -.01em; }
+  .patch span { font-size: 23px; font-weight: 700; color: var(--ok); }
+  .lede {
+    margin-top: 18px; max-width: 610px;
+    font-size: 23px; line-height: 1.4; color: var(--muted);
+  }
+  .lede strong { color: var(--ink); font-weight: 700; }
+  .lede code { font: 500 20px ui-monospace, "SF Mono", Menlo, monospace; color: var(--php); }
+  .chips { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
   .chip {
     font-size: 17px; font-weight: 600; color: #dcdbe9;
     padding: 9px 14px; border-radius: 10px;
@@ -101,8 +118,8 @@
   .bar span:nth-child(3) { background: #28c840; }
   .bar small { margin-left: 10px; font: 500 13px ui-monospace, "SF Mono", Menlo, monospace; color: var(--faint); }
   pre {
-    padding: 20px 22px 24px;
-    font: 500 15.5px/1.62 ui-monospace, "SF Mono", Menlo, monospace;
+    padding: 18px 22px 22px;
+    font: 500 15px/1.6 ui-monospace, "SF Mono", Menlo, monospace;
     color: #d6d5e4; white-space: pre;
   }
   .p { color: var(--ubuntu); }
@@ -110,6 +127,7 @@
   .d { color: var(--faint); }
   .v { color: var(--php); }
   .ok { color: var(--ok); }
+  .cve { color: #ffb48f; }
 
   .foot {
     position: absolute; left: 72px; right: 72px; bottom: 30px;
@@ -130,27 +148,27 @@
       <span class="eyebrow"><i></i>Unofficial backport · amd64</span>
       <h1>PHP 7.4</h1>
       <h2>for Ubuntu <em>18.04</em> bionic</h2>
-      <p class="lede">Security-patched <code>php7.4</code> from <code>ppa:ondrej/php</code>, rebuilt as .deb packages for servers still on 18.04.</p>
+      <div class="patch"><span class="tick">✓</span><b>7.4.33-37</b><span>latest security fixes</span></div>
+      <p class="lede">Includes <strong>12 CVE fixes from -36</strong>, rebuilt as .deb packages from <code>ppa:ondrej/php</code>.</p>
       <div class="chips">
-        <span class="chip"><b>✓</b> Built in GitHub Actions</span>
         <span class="chip"><b>✓</b> Provenance attested</span>
         <span class="chip"><b>✓</b> Upgrade &amp; rollback tested</span>
       </div>
     </section>
 
     <aside class="term">
-      <div class="bar"><span></span><span></span><span></span><small>bionic — bash</small></div>
-<pre><span class="p">$</span> <span class="c">php -v</span>
-PHP 7.4.33 (cli) <span class="d">( NTS )</span>
-<span class="d">    with Zend OPcache v7.4.33</span>
-
-<span class="p">$</span> <span class="c">dpkg-query -W php7.4-fpm</span>
+      <div class="bar"><span></span><span></span><span></span><small>/usr/share/doc/php7.4-common</small></div>
+<pre><span class="p">$</span> <span class="c">dpkg-query -W php7.4-fpm</span>
 php7.4-fpm  <span class="v">1:7.4.33-37</span>
 <span class="d">            +ubuntu18.04.1+local1</span>
 
-<span class="p">$</span> <span class="c">sudo php-fpm7.4 -t</span>
-<span class="d">NOTICE: configuration file ...</span>
-<span class="d">        test is</span> <span class="ok">successful</span>
+<span class="p">$</span> <span class="c">zcat changelog.Debian.gz | grep CVE</span>
+  + [<span class="cve">CVE-2026-129538</span>] PHP-CGI out-of-…
+  + [<span class="cve">CVE-2026-129496</span>] Timezone cache…
+  + [<span class="cve">CVE-2026-129289</span>] PHP-FPM request…
+  + [<span class="cve">CVE-2026-129292</span>] PHP-FPM status…
+  + [<span class="cve">CVE-2026-129291</span>] PHP-FPM epoll …
+<span class="d">  … 12 CVEs fixed in -36</span>
 
 <span class="p">$</span> <span class="c">gh attestation verify *.tar</span>
 <span class="ok">✓ Verification succeeded!</span></pre>

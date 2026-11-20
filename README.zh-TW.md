@@ -9,68 +9,15 @@
 
 [English](README.md) | 繁體中文
 
+![PHP 7.4 for Ubuntu 18.04 bionic：從 ppa:ondrej/php 重新編譯、含安全修補的 php7.4 deb 套件](.github/social-preview.png)
+
 把 [Ondřej Surý PPA](https://launchpad.net/~ondrej/+archive/ubuntu/php) 的 `php7.4` 套件，重新編譯給 **Ubuntu 18.04 LTS (bionic)、amd64** 使用。這是非官方的版本。
 
 每個版本都由 [GitHub Actions](.github/workflows/release.yml) 公開編譯和測試，並附上可以自行驗證的 build provenance attestation（建置來源證明）。
 
-## 為什麼要做這個
-
-- PPA（`ppa:ondrej/php`）已經不再為 18.04 和 20.04 出 php7.4。
-- 但 22.04 以上還持續有 PHP 7.4.33 的安全修補，版號是 `1:7.4.33-NN`。
-- 這個專案把 PPA 22.04 的原始碼套件**原封不動**，放進 `ubuntu:18.04` 容器重新編譯。除了版號，原始碼、`debian/control` 和 patch 都沒有改。
-- 編出來的套件連結的是 18.04 的函式庫（`libssl1.1`、`libsodium23`…），可以直接用 `apt-get` 安裝。
-
-## 提供的版本
-
-| Release | 套件版號 | 來源 | 用途 |
-|---|---|---|---|
-| [`7.4.33-37`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-37) | `1:7.4.33-37+ubuntu18.04.1+local1` | `1:7.4.33-37+ubuntu22.04.1+deb.sury.org+1` | **建議使用**，全新安裝和升級 |
-| [`7.4.33-31`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-31) | `1:7.4.33-31+ubuntu18.04.1+local1` | `1:7.4.33-31+ubuntu22.04.1+deb.sury.org+1` | 退版用 |
-
-每個 Release 裡有：
-
-| 檔案 | 內容 |
-|---|---|
-| `php7.4-bionic-7.4.33-NN-amd64.tar` | 下面所有檔案打包成一個檔。**下載這個就好。** |
-| `*.deb` | `php7.4` 原始碼編出的全部 38 個套件（`cli`、`fpm`、`cgi`、`libapache2-mod-php7.4`、`dev` 和所有擴充），加上 `php-common`。不含除錯符號套件。 |
-| `SHA256SUMS` | 所有 `.deb` 的 checksum |
-| `BUILD-INFO.txt` | 套件版號、來源版號、`php -v` 的輸出、git commit、workflow 執行紀錄 |
-| `*.buildinfo`、`*.changes` | Debian 的編譯資訊 |
-
-### -31 到 -37 改了什麼
-
-整理自 Debian changelog（`zcat /usr/share/doc/php7.4-common/changelog.Debian.gz`）：
-
-| 版本 | 內容 |
-|---|---|
-| `-32` | 修正 `fpm_status_export_to_zval` 的 segfault（來自 8.1.27）。修正 CVE-2024-11235，`php_request_shutdown` 的 use-after-free（來自 8.3.19）。 |
-| `-33` | 修正 OpenSSL 3 下 `openssl_csr_get_public_key()` 會回傳私鑰的問題。`imagetruecolortopalette()` 不再使用 libimagequant。修正測試。 |
-| `-34` | 修正 imap `utf8_to_mutf7()` 的 configure 檢查。保留 `enchant_dict_is_in_session()` 別名。 |
-| `-35` | 修正 `fpm_get_status()` 的多個問題。 |
-| `-36` | **從 8.2.36 移植 12 個安全修補**，涵蓋 PHP-CGI、PHP-FPM、session、PHAR、SOAP，以及 HTTP/FTP stream wrapper。 |
-| `-37` | 上游測試改到 autopkgtest 跑，不在編譯時跑。程式碼沒有變動。 |
-
-<details>
-<summary>-36 修補的 CVE</summary>
-
-以 changelog 的原文為準：
-
-- CVE-2026-129538：PHP-CGI 修正 `PATH_INFO` 時越界讀寫
-- CVE-2026-129496：時區快取 use-after-free，可能導致遠端執行程式碼
-- CVE-2026-129289：PHP-FPM 透過未讀取的 HTTP request body 進行 request smuggling
-- CVE-2026-129292：PHP-FPM status 頁面沒有跳脫 user 和 script 欄位，造成 XSS
-- CVE-2026-129291：PHP-FPM epoll use-after-free，可能導致本機權限提升
-- CVE-2026-128090：PHAR OpenSSL 簽章可透過演算法降級繞過
-- CVE-2026-126714：session 檔案被部分覆寫時，可能導致遠端執行程式碼
-- CVE-2026-115560：session serializer 不一致，可能導致遠端執行程式碼
-- CVE-2026-15353：SOAP 處理格式錯誤的陣列維度時洩漏資訊
-- CVE-2026-129506：SOAP 處理 DTD entity reference 時 use-after-free
-- CVE-2026-128064：大小寫混用的 HTTPS、FTPS 網址可能以明文傳送資料
-- CVE-2026-127960：折行的 HTTP response header 造成阻斷服務
-
-</details>
-
 ## 下載和驗證
+
+沒有特別原因的話，請用 `7.4.33-37`。`7.4.33-31` 留著給退版用，兩版的差異見 [提供的版本](#提供的版本)。
 
 在 18.04 主機上：
 
@@ -165,6 +112,63 @@ sudo php-fpm7.4 -t && sudo systemctl status php7.4-fpm --no-pager
 
 - `dpkg-query -W php7.4-cli php7.4-fpm`
 - 看 `php -v` 的 `built:` 時間。每個 Release 的說明和 `BUILD-INFO.txt` 都有列出。
+
+## 提供的版本
+
+| Release | 套件版號 | 來源 | 用途 |
+|---|---|---|---|
+| [`7.4.33-37`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-37) | `1:7.4.33-37+ubuntu18.04.1+local1` | `1:7.4.33-37+ubuntu22.04.1+deb.sury.org+1` | **建議使用**，全新安裝和升級 |
+| [`7.4.33-31`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-31) | `1:7.4.33-31+ubuntu18.04.1+local1` | `1:7.4.33-31+ubuntu22.04.1+deb.sury.org+1` | 退版用 |
+
+每個 Release 裡有：
+
+| 檔案 | 內容 |
+|---|---|
+| `php7.4-bionic-7.4.33-NN-amd64.tar` | 下面所有檔案打包成一個檔。**下載這個就好。** |
+| `*.deb` | `php7.4` 原始碼編出的全部 38 個套件（`cli`、`fpm`、`cgi`、`libapache2-mod-php7.4`、`dev` 和所有擴充），加上 `php-common`。不含除錯符號套件。 |
+| `SHA256SUMS` | 所有 `.deb` 的 checksum |
+| `BUILD-INFO.txt` | 套件版號、來源版號、`php -v` 的輸出、git commit、workflow 執行紀錄 |
+| `*.buildinfo`、`*.changes` | Debian 的編譯資訊 |
+
+### -31 到 -37 改了什麼
+
+整理自 Debian changelog（`zcat /usr/share/doc/php7.4-common/changelog.Debian.gz`）：
+
+| 版本 | 內容 |
+|---|---|
+| `-32` | 修正 `fpm_status_export_to_zval` 的 segfault（來自 8.1.27）。修正 CVE-2024-11235，`php_request_shutdown` 的 use-after-free（來自 8.3.19）。 |
+| `-33` | 修正 OpenSSL 3 下 `openssl_csr_get_public_key()` 會回傳私鑰的問題。`imagetruecolortopalette()` 不再使用 libimagequant。修正測試。 |
+| `-34` | 修正 imap `utf8_to_mutf7()` 的 configure 檢查。保留 `enchant_dict_is_in_session()` 別名。 |
+| `-35` | 修正 `fpm_get_status()` 的多個問題。 |
+| `-36` | **從 8.2.36 移植 12 個安全修補**，涵蓋 PHP-CGI、PHP-FPM、session、PHAR、SOAP，以及 HTTP/FTP stream wrapper。 |
+| `-37` | 上游測試改到 autopkgtest 跑，不在編譯時跑。程式碼沒有變動。 |
+
+<details>
+<summary>-36 修補的 CVE</summary>
+
+以 changelog 的原文為準：
+
+- CVE-2026-129538：PHP-CGI 修正 `PATH_INFO` 時越界讀寫
+- CVE-2026-129496：時區快取 use-after-free，可能導致遠端執行程式碼
+- CVE-2026-129289：PHP-FPM 透過未讀取的 HTTP request body 進行 request smuggling
+- CVE-2026-129292：PHP-FPM status 頁面沒有跳脫 user 和 script 欄位，造成 XSS
+- CVE-2026-129291：PHP-FPM epoll use-after-free，可能導致本機權限提升
+- CVE-2026-128090：PHAR OpenSSL 簽章可透過演算法降級繞過
+- CVE-2026-126714：session 檔案被部分覆寫時，可能導致遠端執行程式碼
+- CVE-2026-115560：session serializer 不一致，可能導致遠端執行程式碼
+- CVE-2026-15353：SOAP 處理格式錯誤的陣列維度時洩漏資訊
+- CVE-2026-129506：SOAP 處理 DTD entity reference 時 use-after-free
+- CVE-2026-128064：大小寫混用的 HTTPS、FTPS 網址可能以明文傳送資料
+- CVE-2026-127960：折行的 HTTP response header 造成阻斷服務
+
+</details>
+
+## 為什麼要做這個
+
+- PPA（`ppa:ondrej/php`）已經不再為 18.04 和 20.04 出 php7.4。
+- 但 22.04 以上還持續有 PHP 7.4.33 的安全修補，版號是 `1:7.4.33-NN`。
+- 這個專案把 PPA 22.04 的原始碼套件**原封不動**，放進 `ubuntu:18.04` 容器重新編譯。除了版號，原始碼、`debian/control` 和 patch 都沒有改。
+- 編出來的套件連結的是 18.04 的函式庫（`libssl1.1`、`libsodium23`…），可以直接用 `apt-get` 安裝。
 
 ## 編譯和測試流程
 
@@ -281,6 +285,7 @@ PHP 採用 PHP License 3.01。每個套件的授權寫在 `/usr/share/doc/<套�
 build-php74-bionic.sh           編譯 script（在 ubuntu:18.04 容器裡編）
 tests/                          CI 在乾淨的 ubuntu:18.04 容器裡跑的安裝測試
 .github/workflows/release.yml   編譯、測試、產生 attestation、發佈 Release
+.github/social-preview.*        封面圖和它的 HTML 原始檔
 ```
 
 `.deb` 只會放在 Release 上，不會放進 git。

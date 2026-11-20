@@ -9,68 +9,15 @@
 
 English | [繁體中文](README.zh-TW.md)
 
+![PHP 7.4 for Ubuntu 18.04 bionic: security-patched php7.4 from ppa:ondrej/php, rebuilt as .deb packages](.github/social-preview.png)
+
 Unofficial rebuilds of the `php7.4` packages from [Ondřej Surý's PPA](https://launchpad.net/~ondrej/+archive/ubuntu/php) for **Ubuntu 18.04 LTS (bionic), amd64**.
 
 Every release is built and tested in public by [GitHub Actions](.github/workflows/release.yml), and comes with a signed build provenance attestation that you can verify.
 
-## Why this exists
-
-- The PPA (`ppa:ondrej/php`) no longer publishes php7.4 for bionic (18.04) or focal (20.04).
-- It still ships backported security fixes for PHP 7.4.33 on jammy (22.04) and newer, as `1:7.4.33-NN`.
-- This project takes the **unmodified** jammy source package and rebuilds it inside an `ubuntu:18.04` container. Only the version number changes; the source, `debian/control` and patches are untouched.
-- The resulting packages link against the 18.04 libraries (`libssl1.1`, `libsodium23`, …) and install with plain `apt-get`.
-
-## Versions
-
-| Release | Package version | Rebuilt from | Use it for |
-|---|---|---|---|
-| [`7.4.33-37`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-37) | `1:7.4.33-37+ubuntu18.04.1+local1` | `1:7.4.33-37+ubuntu22.04.1+deb.sury.org+1` | **Recommended.** New installs and upgrades |
-| [`7.4.33-31`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-31) | `1:7.4.33-31+ubuntu18.04.1+local1` | `1:7.4.33-31+ubuntu22.04.1+deb.sury.org+1` | Rollback target |
-
-Each release contains:
-
-| File | Contents |
-|---|---|
-| `php7.4-bionic-7.4.33-NN-amd64.tar` | Everything below in one file. **Download this one.** |
-| `*.deb` | All 38 binary packages built from the `php7.4` source (`cli`, `fpm`, `cgi`, `libapache2-mod-php7.4`, `dev` and every extension), plus `php-common`. Debug symbol packages are not included. |
-| `SHA256SUMS` | Checksums of the `.deb` files |
-| `BUILD-INFO.txt` | Package version, source version, `php -v` output, git commit and workflow run |
-| `*.buildinfo`, `*.changes` | Debian build metadata |
-
-### What changed from -31 to -37
-
-From the Debian changelog (`zcat /usr/share/doc/php7.4-common/changelog.Debian.gz`):
-
-| Revision | Changes |
-|---|---|
-| `-32` | Fix for a segfault in `fpm_status_export_to_zval` (from 8.1.27). Fix for CVE-2024-11235, a use-after-free in `php_request_shutdown` (from 8.3.19). |
-| `-33` | `openssl_csr_get_public_key()` no longer returns the private key with OpenSSL 3. `imagetruecolortopalette()` no longer uses libimagequant. Test suite fixes. |
-| `-34` | imap `utf8_to_mutf7()` configure check fixed. `enchant_dict_is_in_session()` kept as an alias. |
-| `-35` | Multiple fixes in `fpm_get_status()`. |
-| `-36` | **12 security fixes from 8.2.36** in PHP-CGI, PHP-FPM, sessions, PHAR, SOAP and the HTTP/FTP stream wrappers. |
-| `-37` | The upstream test suite runs under autopkgtest instead of during the build. No code changes. |
-
-<details>
-<summary>CVEs fixed in -36</summary>
-
-As listed in the changelog:
-
-- CVE-2026-129538: PHP-CGI out-of-bounds read and write during `PATH_INFO` correction
-- CVE-2026-129496: timezone cache use-after-free can lead to remote code execution
-- CVE-2026-129289: PHP-FPM request smuggling through an unread HTTP request body
-- CVE-2026-129292: PHP-FPM status endpoint XSS via unescaped user and script fields
-- CVE-2026-129291: PHP-FPM epoll use-after-free can lead to local privilege escalation
-- CVE-2026-128090: PHAR OpenSSL signature bypass via algorithm downgrade
-- CVE-2026-126714: partially overwritten session files can lead to remote code execution
-- CVE-2026-115560: session serializer mismatch can lead to remote code execution
-- CVE-2026-15353: SOAP information disclosure through malformed array dimensions
-- CVE-2026-129506: SOAP use-after-free when processing DTD entity references
-- CVE-2026-128064: mixed-case HTTPS and FTPS URLs can expose data in plaintext
-- CVE-2026-127960: denial of service through folded HTTP response headers
-
-</details>
-
 ## Download and verify
+
+Use `7.4.33-37` unless you have a reason not to. `7.4.33-31` is kept as a rollback target. See [Versions](#versions) for what changed between them.
 
 On the 18.04 server:
 
@@ -161,6 +108,63 @@ Use either of these instead:
 
 - `dpkg-query -W php7.4-cli php7.4-fpm`
 - The `built:` time in `php -v`. Each release lists it in its notes and in `BUILD-INFO.txt`.
+
+## Versions
+
+| Release | Package version | Rebuilt from | Use it for |
+|---|---|---|---|
+| [`7.4.33-37`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-37) | `1:7.4.33-37+ubuntu18.04.1+local1` | `1:7.4.33-37+ubuntu22.04.1+deb.sury.org+1` | **Recommended.** New installs and upgrades |
+| [`7.4.33-31`](https://github.com/guanting112/php7.4-bionic-backport/releases/tag/7.4.33-31) | `1:7.4.33-31+ubuntu18.04.1+local1` | `1:7.4.33-31+ubuntu22.04.1+deb.sury.org+1` | Rollback target |
+
+Each release contains:
+
+| File | Contents |
+|---|---|
+| `php7.4-bionic-7.4.33-NN-amd64.tar` | Everything below in one file. **Download this one.** |
+| `*.deb` | All 38 binary packages built from the `php7.4` source (`cli`, `fpm`, `cgi`, `libapache2-mod-php7.4`, `dev` and every extension), plus `php-common`. Debug symbol packages are not included. |
+| `SHA256SUMS` | Checksums of the `.deb` files |
+| `BUILD-INFO.txt` | Package version, source version, `php -v` output, git commit and workflow run |
+| `*.buildinfo`, `*.changes` | Debian build metadata |
+
+### What changed from -31 to -37
+
+From the Debian changelog (`zcat /usr/share/doc/php7.4-common/changelog.Debian.gz`):
+
+| Revision | Changes |
+|---|---|
+| `-32` | Fix for a segfault in `fpm_status_export_to_zval` (from 8.1.27). Fix for CVE-2024-11235, a use-after-free in `php_request_shutdown` (from 8.3.19). |
+| `-33` | `openssl_csr_get_public_key()` no longer returns the private key with OpenSSL 3. `imagetruecolortopalette()` no longer uses libimagequant. Test suite fixes. |
+| `-34` | imap `utf8_to_mutf7()` configure check fixed. `enchant_dict_is_in_session()` kept as an alias. |
+| `-35` | Multiple fixes in `fpm_get_status()`. |
+| `-36` | **12 security fixes from 8.2.36** in PHP-CGI, PHP-FPM, sessions, PHAR, SOAP and the HTTP/FTP stream wrappers. |
+| `-37` | The upstream test suite runs under autopkgtest instead of during the build. No code changes. |
+
+<details>
+<summary>CVEs fixed in -36</summary>
+
+As listed in the changelog:
+
+- CVE-2026-129538: PHP-CGI out-of-bounds read and write during `PATH_INFO` correction
+- CVE-2026-129496: timezone cache use-after-free can lead to remote code execution
+- CVE-2026-129289: PHP-FPM request smuggling through an unread HTTP request body
+- CVE-2026-129292: PHP-FPM status endpoint XSS via unescaped user and script fields
+- CVE-2026-129291: PHP-FPM epoll use-after-free can lead to local privilege escalation
+- CVE-2026-128090: PHAR OpenSSL signature bypass via algorithm downgrade
+- CVE-2026-126714: partially overwritten session files can lead to remote code execution
+- CVE-2026-115560: session serializer mismatch can lead to remote code execution
+- CVE-2026-15353: SOAP information disclosure through malformed array dimensions
+- CVE-2026-129506: SOAP use-after-free when processing DTD entity references
+- CVE-2026-128064: mixed-case HTTPS and FTPS URLs can expose data in plaintext
+- CVE-2026-127960: denial of service through folded HTTP response headers
+
+</details>
+
+## Why this exists
+
+- The PPA (`ppa:ondrej/php`) no longer publishes php7.4 for bionic (18.04) or focal (20.04).
+- It still ships backported security fixes for PHP 7.4.33 on jammy (22.04) and newer, as `1:7.4.33-NN`.
+- This project takes the **unmodified** jammy source package and rebuilds it inside an `ubuntu:18.04` container. Only the version number changes; the source, `debian/control` and patches are untouched.
+- The resulting packages link against the 18.04 libraries (`libssl1.1`, `libsodium23`, …) and install with plain `apt-get`.
 
 ## How releases are built and tested
 
@@ -277,6 +281,7 @@ PHP is distributed under the PHP License 3.01. The license of each package is in
 build-php74-bionic.sh           Build script (runs the build in an ubuntu:18.04 container)
 tests/                          Install tests run by CI in clean ubuntu:18.04 containers
 .github/workflows/release.yml   Build, test, attest and publish releases
+.github/social-preview.*        Cover image and its HTML source
 ```
 
 The `.deb` files are published only as release assets, never committed to git.

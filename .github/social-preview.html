@@ -1,0 +1,165 @@
+<!doctype html>
+<!-- Source of social-preview.png (GitHub social preview, 1280x640).
+     Render: "Google Chrome" --headless=new --hide-scrollbars --window-size=1280,640 \
+               --screenshot=social-preview.png file://$PWD/social-preview.html -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>php7.4-bionic-backport social preview</title>
+<style>
+  :root {
+    --bg: #100f18;
+    --ink: #f4f3fa;
+    --muted: #a9a7bd;
+    --faint: #6f6c86;
+    --php: #8f93d6;
+    --php-deep: #777bb4;
+    --ubuntu: #f0683c;
+    --ok: #5fd49a;
+    --card: #191826;
+    --card-line: #2c2a40;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    position: relative;
+  }
+  .glow {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(620px 420px at 8% 0%, rgba(119, 123, 180, .38), transparent 70%),
+      radial-gradient(560px 420px at 100% 100%, rgba(233, 84, 32, .30), transparent 70%);
+  }
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,.25));
+  }
+  .wrap {
+    position: relative;
+    height: 100%;
+    padding: 64px 72px 56px;
+    display: grid;
+    grid-template-columns: 1fr 470px;
+    column-gap: 56px;
+    align-items: center;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font: 600 15px/1 ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted);
+    padding: 9px 14px;
+    border: 1px solid #34324a; border-radius: 999px;
+    background: rgba(255,255,255,.03);
+  }
+  .eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--ubuntu); display: block; }
+  h1 {
+    margin-top: 26px;
+    font-weight: 800;
+    font-size: 132px; line-height: .92; letter-spacing: -.035em;
+    background: linear-gradient(180deg, #ffffff 10%, #c9cbf0 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h2 {
+    margin-top: 10px;
+    font-weight: 700; font-size: 54px; line-height: 1.05; letter-spacing: -.02em;
+    color: var(--ink);
+  }
+  h2 em { font-style: normal; color: var(--ubuntu); }
+  .lede {
+    margin-top: 22px; max-width: 600px;
+    font-size: 24px; line-height: 1.4; color: var(--muted);
+  }
+  .lede code { font: 500 21px ui-monospace, "SF Mono", Menlo, monospace; color: var(--php); }
+  .chips { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip {
+    font-size: 17px; font-weight: 600; color: #dcdbe9;
+    padding: 9px 14px; border-radius: 10px;
+    background: rgba(255,255,255,.05); border: 1px solid #2f2d44;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .chip b { color: var(--ok); font-weight: 800; }
+
+  .term {
+    background: var(--card);
+    border: 1px solid var(--card-line);
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.02) inset;
+    overflow: hidden;
+  }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--card-line); }
+  .bar span { width: 12px; height: 12px; border-radius: 50%; background: #3a3852; }
+  .bar span:nth-child(1) { background: #ff5f57; }
+  .bar span:nth-child(2) { background: #febc2e; }
+  .bar span:nth-child(3) { background: #28c840; }
+  .bar small { margin-left: 10px; font: 500 13px ui-monospace, "SF Mono", Menlo, monospace; color: var(--faint); }
+  pre {
+    padding: 20px 22px 24px;
+    font: 500 15.5px/1.62 ui-monospace, "SF Mono", Menlo, monospace;
+    color: #d6d5e4; white-space: pre;
+  }
+  .p { color: var(--ubuntu); }
+  .c { color: #ffffff; }
+  .d { color: var(--faint); }
+  .v { color: var(--php); }
+  .ok { color: var(--ok); }
+
+  .foot {
+    position: absolute; left: 72px; right: 72px; bottom: 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    font: 500 17px ui-monospace, "SF Mono", Menlo, monospace; color: var(--faint);
+  }
+  .foot strong { color: var(--muted); font-weight: 600; }
+  .bars { display: flex; gap: 6px; }
+  .bars i { width: 34px; height: 5px; border-radius: 3px; display: block; }
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="grid"></div>
+
+  <div class="wrap">
+    <section>
+      <span class="eyebrow"><i></i>Unofficial backport · amd64</span>
+      <h1>PHP 7.4</h1>
+      <h2>for Ubuntu <em>18.04</em> bionic</h2>
+      <p class="lede">Security-patched <code>php7.4</code> from <code>ppa:ondrej/php</code>, rebuilt as .deb packages for servers still on 18.04.</p>
+      <div class="chips">
+        <span class="chip"><b>✓</b> Built in GitHub Actions</span>
+        <span class="chip"><b>✓</b> Provenance attested</span>
+        <span class="chip"><b>✓</b> Upgrade &amp; rollback tested</span>
+      </div>
+    </section>
+
+    <aside class="term">
+      <div class="bar"><span></span><span></span><span></span><small>bionic — bash</small></div>
+<pre><span class="p">$</span> <span class="c">php -v</span>
+PHP 7.4.33 (cli) <span class="d">( NTS )</span>
+<span class="d">    with Zend OPcache v7.4.33</span>
+
+<span class="p">$</span> <span class="c">dpkg-query -W php7.4-fpm</span>
+php7.4-fpm  <span class="v">1:7.4.33-37</span>
+<span class="d">            +ubuntu18.04.1+local1</span>
+
+<span class="p">$</span> <span class="c">sudo php-fpm7.4 -t</span>
+<span class="d">NOTICE: configuration file ...</span>
+<span class="d">        test is</span> <span class="ok">successful</span>
+
+<span class="p">$</span> <span class="c">gh attestation verify *.tar</span>
+<span class="ok">✓ Verification succeeded!</span></pre>
+    </aside>
+  </div>
+
+  <div class="foot">
+    <span>github.com/<strong>guanting112/php7.4-bionic-backport</strong></span>
+    <span class="bars"><i style="background:var(--php-deep)"></i><i style="background:var(--ubuntu)"></i></span>
+  </div>
+</body>
+</html>

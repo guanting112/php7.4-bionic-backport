@@ -1,4 +1,4 @@
-# PHP 7.4 for Ubuntu 18.04 (bionic)
+# PHP 7.4.33-37 for Ubuntu 18.04, with the latest security fixes
 
 [![Build and release](https://github.com/guanting112/php7.4-bionic-backport/actions/workflows/release.yml/badge.svg)](https://github.com/guanting112/php7.4-bionic-backport/actions/workflows/release.yml)
 [![Latest release](https://img.shields.io/github/v/release/guanting112/php7.4-bionic-backport?label=release)](https://github.com/guanting112/php7.4-bionic-backport/releases/latest)
